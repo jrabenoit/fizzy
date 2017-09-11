@@ -7,18 +7,17 @@ import os, pickle
 #Gives average accuracy of each param set tested on inner loop data
 def Pivot():
     df=pd.read_csv('/media/james/ext4data1/current/projects/pfizer/3151A1-303-csv2/deid_hamd17.csv')
-
     df2=df[df['CPENM']=='DAY 7']
     df3=df[df['CPENM']=='DAY 300']
-    
     df2b= df2.pivot(index='PATIENT',columns='TESTS',values='VALN')
     df3b= df3.pivot(index='PATIENT',columns='TESTS',values='VALN')
-
     df2b.columns='Day 7: ' + df2b.columns
     df3b.columns='Day 300: ' + df3b.columns
-    
+   
     dfc=pd.concat([df2b, df3b], axis=1, join='inner')
     #1136 subjects remain who have data in all columns
+
+    
     
     data={}    
     for i in dfc.index:
