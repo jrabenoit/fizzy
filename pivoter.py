@@ -44,19 +44,17 @@ def Pivot():
             data[i]['tx_nonresponder']=True
         else: data[i]['tx_nonresponder']=False
         
+    data=pd.DataFrame(data)
+    data=data.transpose()
     
-    #We want to restructure the shopvec code so we can just create columns in the existing "dfc" dataframe rather than making a secondary dict, "data". This is just to fit it into the existing shopvec code for now.
-    #data=pd.DataFrame(data)
+    data=pd.concat([data, dfc], axis=1, join='inner')
     
     with open('/media/james/ext4data1/current/projects/pfizer/vectors/data'+'.pickle', 'wb') as d:
         pickle.dump(data, d, pickle.HIGHEST_PROTOCOL) 
-    with open('/media/james/ext4data1/current/projects/pfizer/vectors/dfc'+'.pickle', 'wb') as d:
-        pickle.dump(dfc, d, pickle.HIGHEST_PROTOCOL) 
+        
     return
 
 '''
-with open('/media/james/ext4data1/current/projects/pfizer/vectors/dfc.pickle', 'rb') as f:
-    dfc= pickle.load(f)
 with open('/media/james/ext4data1/current/projects/pfizer/vectors/data.pickle', 'rb') as f:
     data= pickle.load(f)
 
