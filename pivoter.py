@@ -16,9 +16,7 @@ def Pivot():
    
     dfc=pd.concat([df2b, df3b], axis=1, join='inner')
     #1136 subjects remain who have data in all columns
-
-    
-    
+   
     data={}    
     for i in dfc.index:
         data[i]={}

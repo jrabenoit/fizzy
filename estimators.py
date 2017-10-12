@@ -4,6 +4,15 @@ import numpy as np
 import copy, pickle
 from sklearn import svm, naive_bayes, neighbors, ensemble, linear_model, tree, discriminant_analysis
 
+'''
+>>>LOOK HERE<<<
+https://stackoverflow.com/questions/38894576/sklearn-fit-model-multiple-times
+for classifier in classifiers:
+  votes[classifier.predict(X)] += 1
+prediction = numpy.argmax(votes)
+>>>LOOK HERE<<<
+'''
+
 def Highlander():
     with open('/media/james/ext4data1/current/projects/pfizer/vectors/inner_cv.pickle','rb') as f: 
         cv=pickle.load(f)       
