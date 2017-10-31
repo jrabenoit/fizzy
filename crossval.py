@@ -7,7 +7,7 @@ from collections import defaultdict
 from sklearn.feature_selection import SelectKBest
 from sklearn.model_selection import StratifiedKFold
 
-def CVSetup():   
+def OuterCv(group):   
     
     with open('/media/james/ext4data1/current/projects/pfizer/vectors/data.pickle', 'rb') as f:
         data= pickle.load(f)
