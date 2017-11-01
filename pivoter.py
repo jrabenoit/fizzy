@@ -5,16 +5,16 @@ import numpy as np
 import os, pickle
 
 #Gives average accuracy of each param set tested on inner loop data
-def Pivot():
-    df=pd.read_csv('/media/james/ext4data1/current/projects/pfizer/3151A1-303-csv2/deid_hamd17.csv')
-    df2=df[df['CPENM']=='DAY 7']
-    df3=df[df['CPENM']=='DAY 300']
-    df2b= df2.pivot(index='PATIENT',columns='TESTS',values='VALN')
-    df3b= df3.pivot(index='PATIENT',columns='TESTS',values='VALN')
-    df2b.columns='Day 7: ' + df2b.columns
-    df3b.columns='Day 300: ' + df3b.columns
+def TestJoin():
+    raw=pd.read_csv('/media/james/ext4data1/current/projects/pfizer/3151A1-303-csv2/deid_hamd17.csv')
+    d7=raw[raw['CPENM']=='DAY 7']
+    d300=raw[raw['CPENM']=='DAY 300']
+    d7p= d7.pivot(index='PATIENT',columns='TESTS',values='VALN')
+    d300p= d300.pivot(index='PATIENT',columns='TESTS',values='VALN')
+    d7p.columns='Day 7: ' + df2b.columns
+    d300p.columns='Day 300: ' + df3b.columns
    
-    dfc=pd.concat([df2b, df3b], axis=1, join='inner')
+    agg=pd.concat([df2b, df3b], axis=1, join='inner')
     #1136 subjects remain who have data in all columns
    
     data={}    
@@ -51,10 +51,9 @@ def Pivot():
         
     return
 
-'''
-with open('/media/james/ext4data1/current/projects/pfizer/vectors/data.pickle', 'rb') as f:
-    data= pickle.load(f)
 
+    
+'''
 dfs2b['HAMD Total'].describe()
 np.intersect1d(dfs2['PATIENT'],dfs['PATIENT'])
 np.setdiff1d(dfs2['PATIENT'],dfs['PATIENT'])
