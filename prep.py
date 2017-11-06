@@ -5,7 +5,7 @@ import os, scipy.stats
 import numpy as np
 
 def Agglomerate():
-    discrete= ['deid_adverse', 'deid_aemeddra', 'deid_cgi', 'deid_demow', 'deid_diaghist', 'deid_hamd17', 'deid_hamd17a', 'deid_labbase', 'deid_maddrs', 'deid_medhist', 'deid_medhist2', 'deid_nsmed', 'deid_othtrt', 'deid_physexam', 'deid_sdi', 'deid_stdymedw', 'deid_whowbi']
+    discrete= ['deid_adverse']#, 'deid_aemeddra', 'deid_cgi', 'deid_demow', 'deid_diaghist', 'deid_hamd17', 'deid_hamd17a', 'deid_labbase', 'deid_maddrs', 'deid_medhist', 'deid_medhist2', 'deid_nsmed', 'deid_othtrt', 'deid_physexam', 'deid_sdi', 'deid_stdymedw', 'deid_whowbi']
 
    # continuous= [deid_demow, deid_ecgbase, deid_ecgtest, ded_labbase, deid_labtest, deid_qtcn, deid_qtcnbase, deid_stdymedw, deid_vas2, deid_vittest]
     
@@ -16,23 +16,20 @@ def Agglomerate():
         c= pd.get_dummies(b)
         
         d= {}
-        for i in list(set(c.index)):
-            d[i]= c.loc[i].values.flatten()
+        for j in list(set(c.index)):
+            d[j]= c.loc[j].values.flatten()
         
         maxlen=len(d[max(d, key=lambda k: len(d[k]))])    
         
-        for i in d:
-            d[i]=np.append(d[i], [0]*(maxlen-len(d[i])))        
+        for m in d:
+            d[m]=np.append(d[m], [0]*(maxlen-len(d[m])))        
+        
         d= pd.DataFrame.from_dict(d, orient='index')
         d.columns=list(c.columns)*scipy.stats.mode(c.index).count[0]
-        
         #this gives a dataframe with all variables binarized
         
+        d.to_csv(path_or_buf='/media/james/ext4data1/current/projects/pfizer/vecs_'+str(i)+'.csv', index_label='PATIENT')
+        
     return
-    
-    df.values.flatten
-
-
-    
         
         
