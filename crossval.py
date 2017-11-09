@@ -2,42 +2,17 @@
 
 import pprint, itertools, pickle
 import numpy as np
-import pandas as pd
 from collections import defaultdict
 from sklearn.feature_selection import SelectKBest
 from sklearn.model_selection import StratifiedKFold
 
-def OuterCv(group):   
+def OuterCv():   
     
-    with open('/media/james/ext4data1/current/projects/pfizer/vectors/data.pickle', 'rb') as f:
-        data= pickle.load(f)
+    data=np.loadtxt('/media/james/ext4data1/current/projects/pfizer/ready.csv', delimiter=',')
+    labels=pd.read_csv('/media/james/ext4data1/current/projects/pfizer/labels_placebo.csv', encoding='utf-8')
+    labels= list(labels['GROUPLABEL'])
         
-    print('Treatment Response:\n')
-    print(' 1= nonresponder/remitter \n 2= nonresponder/responder \n 3= nonresponder/(remitter+responder) \n 4= responder not remitter/remitter')
-    
-    print('\nStudy contains {} Subjects'.format(len(data.index)))
-    choice= int(input('\nChoice: '))
-    #231 nonresponders, 209 responders, 140 remitters, 69 responders who are not remitters
-    if choice==1:
-        group0=data.loc[data['tx_nonresponder'].isin([True])]
-        group1=data.loc[data['tx_remitter'].isin([True])]
-    elif choice==2:
-        group0=data.loc[data['tx_nonresponder'].isin([True])]
-        group1=data.loc[data['tx_responder'].isin([True])]
-    elif choice==3:
-        group0=data.loc[data['tx_nonresponder'].isin([True])]
-        group1=data.loc[data['tx_responder'].isin([True]) | data['tx_remitter'].isin([True])]
-    elif choice==4:
-        group0=data.loc[data['tx_responder'].isin([True]) & ~data['tx_remitter'].isin([True])]
-        group1=data.loc[data['tx_remitter'].isin([True])]
-    
-    #Randomly pick the number of subjects in smaller group from larger group
-    if len(group0)>len(group1): 
-        group0=group0.sample(len(group1))     
-    elif len(group0)<len(group1): 
-        group1=group1.sample(len(group0))
-   
-    labels = np.array([0]*len(group0)+[1]*len(group1))
+    print('Treatment Response: 379 subjects, 200 remitters (52.77%), 179 with HAM-D > 7\n')
     
     group0=group0.ix[:,5:25]
     group1=group1.ix[:,5:25]
