@@ -14,7 +14,7 @@ prediction = numpy.argmax(votes)
 '''
 
 def Highlander():
-    with open('/media/james/ext4data1/current/projects/pfizer/vectors/inner_cv.pickle','rb') as f: 
+    with open('/media/james/ext4data1/current/projects/pfizer/inner_cv.pickle','rb') as f: 
         cv=pickle.load(f)       
     
     scores={'fold': [], 'train':[], 'test':[]}

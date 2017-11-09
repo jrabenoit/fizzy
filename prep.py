@@ -53,7 +53,7 @@ def GroupDefiner():
     
     labels= labels[labels.index.isin(placebos.index)]
     
-    labels.to_csv(path_or_buf='/media/james/ext4data1/current/projects/pfizer/placebo_patients.csv', index_label='PATIENT')
+    labels.to_csv(path_or_buf='/media/james/ext4data1/current/projects/pfizer/labels_placebo.csv', index_label='PATIENT')
 
     return
 
@@ -78,9 +78,7 @@ def Harvester():
     '''Because it's a combine. Aha. Ha.'''
     #But seriously, joins all tables together by patient row
     
-    info=pd.read_csv('/media/james/ext4data1/current/projects/pfizer/labels_placebo.csv', encoding='utf-8')
-    info=info.set_index('PATIENT')
-    info=info.drop('GROUPLABEL', axis=1)
+    info= pd.read_csv('/media/james/ext4data1/current/projects/pfizer/labels_placebo.csv', encoding='utf-8').set_index('PATIENT').drop('GROUPLABEL', axis=1)
     
     path= '/media/james/ext4data1/current/projects/pfizer/vecs_placebos/'
     csvs= os.listdir(path)    
