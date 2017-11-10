@@ -1,116 +1,158 @@
 #!/usr/bin/env python3
 
 import numpy as np
+import pandas as pd
 import copy, pickle
 from sklearn import svm, naive_bayes, neighbors, ensemble, linear_model, tree, discriminant_analysis
 
-'''
->>>LOOK HERE<<<
-https://stackoverflow.com/questions/38894576/sklearn-fit-model-multiple-times
-for classifier in classifiers:
-  votes[classifier.predict(X)] += 1
-prediction = numpy.argmax(votes)
->>>LOOK HERE<<<
-'''
-
-def Highlander():
-    with open('/media/james/ext4data1/current/projects/pfizer/inner_cv.pickle','rb') as f: 
-        cv=pickle.load(f)       
+def InnerFolds():
+    with open('/media/james/ext4data1/current/projects/pfizer/icvfeats.pickle','rb') as f: icv=pickle.load(f)
+    patients= pd.read_csv('/media/james/ext4data1/current/projects/pfizer/labels_placebo.csv', encoding='utf-8').set_index('PATIENT')
     
-    scores={'fold': [], 'train':[], 'test':[]}
+    folds= len(icv['X_train'])
+    
+    est= {'randomforest': ensemble.RandomForestClassifier(), 
+          'extratrees': ensemble.ExtraTreesClassifier(),
+          'kneighbors': neighbors.KNeighborsClassifier(),
+          'naivebayes': naive_bayes.GaussianNB(),
+          'decisiontree': tree.DecisionTreeClassifier(),
+          'linearsvm': svm.LinearSVC(),
+          'adaboost': ensemble.AdaBoostClassifier()
+          }
+   
+    train_results= {'fold':[], 'estimator':[], 'subjects':[], 
+                    'labels':[], 'predictions':[], 'scores':[], 
+                    'attempts':[]
+                    }
+                    
+    test_results= {'fold':[], 'estimator':[], 'subjects':[], 
+                   'labels':[], 'predictions':[], 'scores':[], 
+                   'attempts':[]
+                   }
+    
+    for i in range(folds):
+        X_train= icv['X_train'][i]
+        X_test= icv['X_test'][i]
+        y_train= icv['y_train'][i]
+        y_test= icv['y_test'][i]        
+        train_ids= patients.index[icv['train_indices'][i]]
+        test_ids= patients.index[icv['test_indices'][i]]
+        
+        for j,k in zip(est.keys(), est.values()):
+            k.fit(X_train, y_train)
+            
+            predict_train= k.predict(X_train)
+            train_scores= [1 if x==y else 0 for x,y in zip(y_train, predict_train)]            
+            train_results['fold'].extend([i+1]*len(X_train))
+            train_results['estimator'].extend([j]*len(X_train))
+            train_results['subjects'].extend(train_ids)
+            train_results['labels'].extend(y_train)
+            train_results['predictions'].extend(predict_train)
+            train_results['scores'].extend(train_scores)
+            train_results['attempts'].extend([1]*len(X_train))
 
-    for i in range(10):  
-        X_train=cv['X_train'][i]
-        X_test=cv['X_test'][i]
-        
-        y_train= cv['y_train'][i]
-        y_test= cv['y_test'][i]
+            predict_test= k.predict(X_test)
+            test_scores= [1 if x==y else 0 for x,y in zip(y_test, predict_test)]         
+            test_results['fold'].extend([i+1]*len(X_test))
+            test_results['estimator'].extend([j]*len(X_test))
+            test_results['subjects'].extend(test_ids)
+            test_results['labels'].extend(y_test)
+            test_results['predictions'].extend(predict_test)
+            test_results['scores'].extend(test_scores)
+            test_results['attempts'].extend([1]*len(X_test))
 
-        #est= ensemble.RandomForestClassifier()
-        #est= ensemble.ExtraTreesClassifier()
-        #est= neighbors.KNeighborsClassifier()
-        est= naive_bayes.GaussianNB()
-        #est= tree.DecisionTreeClassifier()
-        #est= svm.LinearSVC()
-        #est= discriminant_analysis.LinearDiscriminantAnalysis()
-        
-        est.fit(X_train, y_train)
-                
-        print('\nFold {}/10\n'.format((i+1)))
-        
-        predicted_train= est.predict(X_train)
-        train_score= est.score(X_train, y_train)
-        print('X_train predictions: {}'.format(predicted_train))
-        print('y_train actual vals: {}'.format(y_train))        
-        print('Training set score: {}%\n'.format((train_score*100)))
-        
-        predicted_test= est.predict(X_test)
-        test_score= est.score(X_test, y_test)
-        print('X_test predictions: {}'.format(predicted_test))
-        print('y_test actual vals: {}'.format(y_test))
-        print('Baseline accuracy: {}'.format('50%'))
-        print('Test set score: {}%\n'.format((test_score*100)))
+    train_df=pd.DataFrame.from_dict(train_results).set_index('subjects')
+    test_df=pd.DataFrame.from_dict(test_results).set_index('subjects')
+    
+    train_df.to_csv(path_or_buf='/media/james/ext4data1/current/projects/pfizer/inner_train_results.csv')
+    test_df.to_csv(path_or_buf='/media/james/ext4data1/current/projects/pfizer/inner_test_results.csv')
+    
+    trd= train_df.groupby('estimator').sum()
+    trsum= (trd['scores']/trd['attempts'])*100
+    print(trsum)
+    pmax= trsum.idxmax(axis=1)
+    print('\nBest train: {}\n'.format(pmax))
 
-        scores['fold'].append(i)
-        scores['train'].append(train_score)
-        scores['test'].append(test_score)
-                
-    print('All Train Average Acc: {}%'.format((sum(scores['train'])/10)*100))
-    print('All Test Average Acc: {}%'.format((sum(scores['test'])/10)*100))
-    print('All Test Expected Acc: 50%')
-    print('Combined acc per outer fold:\n{}'.format(np.add.reduceat(scores['test'], np.arange(0, 10, 2))*100/2))    
-        
-    with open('/media/james/ext4data1/current/projects/pfizer/vectors/est_scores.pickle', 'wb') as d: pickle.dump(scores, d, pickle.HIGHEST_PROTOCOL) 
-
+    ted= test_df.groupby('estimator').sum()
+    tesum= (ted['scores']/ted['attempts'])*100
+    print(tesum)
+    pmax= tesum.idxmax(axis=1)
+    print('\nBest test: {}\n'.format(pmax))
+    
     return
-    
-def Quickening():
-    with open('/media/james/ext4data1/current/projects/pfizer/vectors/inner_cv.pickle','rb') as f: 
-        cv=pickle.load(f)       
-    
-    scores={'fold': [], 'train':[], 'test':[]}
-    
-    for i in range(5):
-        X_train=cv['X_train'][i]
-        X_test=cv['X_test'][i]
-        
-        y_train= cv['y_train'][i]
-        y_test= cv['y_test'][i]
-        
-        #est= ensemble.RandomForestClassifier()
-        #est= ensemble.ExtraTreesClassifier()
-        #est= neighbors.KNeighborsClassifier()
-        est= naive_bayes.GaussianNB()
-        #est= tree.DecisionTreeClassifier()
-        #est= svm.LinearSVC()
-        #est= discriminant_analysis.LinearDiscriminantAnalysis()
-        
-        est.fit(X_train, y_train)
-                
-        print('\nFold {}/5\n'.format((i+1)))
-        
-        predicted_train= est.predict(X_train)
-        train_score= est.score(X_train, y_train)
-        print('X_train predictions: {}'.format(predicted_train))
-        print('y_train actual vals: {}'.format(y_train))        
-        print('Training set score: {}%\n'.format((train_score*100)))
-        
-        predicted_test= est.predict(X_test)
-        test_score= est.score(X_test, y_test)
-        print('X_test predictions: {}'.format(predicted_test))
-        print('y_test actual vals: {}'.format(y_test))
-        print('Baseline accuracy: {}'.format('50%'))
-        print('Test set score: {}%\n'.format((test_score*100)))
 
-        scores['fold'].append(i)
-        scores['train'].append(train_score)
-        scores['test'].append(test_score)
-                
-    print('All Train Average Acc: {}%'.format((sum(scores['train'])/5)*100))
-    print('All Test Average Acc: {}%'.format((sum(scores['test'])/5)*100))
-    print('All Test Expected Acc: 50%')
-    print('Combined acc per outer fold:\n{}'.format(np.add.reduceat(scores['test'], np.arange(0, 5, 1))*100))    
+def OuterFolds():
+    with open('/media/james/ext4data1/current/projects/pfizer/ocvfeats.pickle','rb') as f: ocv=pickle.load(f)
+    patients= pd.read_csv('/media/james/ext4data1/current/projects/pfizer/labels_placebo.csv', encoding='utf-8').set_index('PATIENT')
+    
+    folds= len(ocv['X_train'])
+    
+    est= {'randomforest': ensemble.RandomForestClassifier(), 
+          #'extratrees': ensemble.ExtraTreesClassifier(),
+          #'kneighbors': neighbors.KNeighborsClassifier(),
+          #'naivebayes': naive_bayes.GaussianNB(),
+          #'decisiontree': tree.DecisionTreeClassifier(),
+          #'linearsvm': svm.LinearSVC(),
+          #'adaboost': ensemble.AdaBoostClassifier()
+          }
+   
+    train_results= {'fold':[], 'estimator':[], 'subjects':[], 
+                    'labels':[], 'predictions':[], 'scores':[], 
+                    'attempts':[]
+                    }
+                    
+    test_results= {'fold':[], 'estimator':[], 'subjects':[], 
+                   'labels':[], 'predictions':[], 'scores':[], 
+                   'attempts':[]
+                   }
+    
+    for i in range(folds):
+        X_train= ocv['X_train'][i]
+        X_test= ocv['X_test'][i]
+        y_train= ocv['y_train'][i]
+        y_test= ocv['y_test'][i]        
+        train_ids= patients.index[ocv['train_indices'][i]]
+        test_ids= patients.index[ocv['test_indices'][i]]
         
-    with open('/media/james/ext4data1/current/projects/ramasubbu/est_scores.pickle', 'wb') as d: pickle.dump(scores, d, pickle.HIGHEST_PROTOCOL) 
+        for j,k in zip(est.keys(), est.values()):
+            k.fit(X_train, y_train)
+            
+            predict_train= k.predict(X_train)
+            train_scores= [1 if x==y else 0 for x,y in zip(y_train, predict_train)]            
+            train_results['fold'].extend([i+1]*len(X_train))
+            train_results['estimator'].extend([j]*len(X_train))
+            train_results['subjects'].extend(train_ids)
+            train_results['labels'].extend(y_train)
+            train_results['predictions'].extend(predict_train)
+            train_results['scores'].extend(train_scores)
+            train_results['attempts'].extend([1]*len(X_train))
 
+            predict_test= k.predict(X_test)
+            test_scores= [1 if x==y else 0 for x,y in zip(y_test, predict_test)]         
+            test_results['fold'].extend([i+1]*len(X_test))
+            test_results['estimator'].extend([j]*len(X_test))
+            test_results['subjects'].extend(test_ids)
+            test_results['labels'].extend(y_test)
+            test_results['predictions'].extend(predict_test)
+            test_results['scores'].extend(test_scores)
+            test_results['attempts'].extend([1]*len(X_test))
+
+    train_df=pd.DataFrame.from_dict(train_results).set_index('subjects')
+    test_df=pd.DataFrame.from_dict(test_results).set_index('subjects')
+    
+    train_df.to_csv(path_or_buf='/media/james/ext4data1/current/projects/pfizer/outer_train_results.csv')
+    test_df.to_csv(path_or_buf='/media/james/ext4data1/current/projects/pfizer/outer_test_results.csv')
+
+    trd= train_df.groupby('estimator').sum()
+    trsum= (trd['scores']/trd['attempts'])*100
+    print(trsum)
+    pmax= trsum.idxmax(axis=1)
+    print('\nBest train: {}\n'.format(pmax))
+
+    ted= test_df.groupby('estimator').sum()
+    tesum= (ted['scores']/ted['attempts'])*100
+    print(tesum)
+    pmax= tesum.idxmax(axis=1)
+    print('\nBest test: {}\n'.format(pmax))
+    
     return
