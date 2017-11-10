@@ -12,29 +12,30 @@ def InnerFolds():
     folds= len(icv['X_train'])
     
     
-    rf= ensemble.RandomForestClassifier(n_estimators=201, criterion='entropy')
+    rf= ensemble.RandomForestClassifier(n_estimators=201, criterion='entropy', max_depth=2)
     et= ensemble.ExtraTreesClassifier(n_estimators=167, max_depth=2)
     kn= neighbors.KNeighborsClassifier(n_neighbors=35, weights='distance')
     nb= naive_bayes.GaussianNB()
     nn= neural_network.MLPClassifier(hidden_layer_sizes=(122,),solver='sgd', max_iter=2000)
     dt= tree.DecisionTreeClassifier(max_depth=2, splitter='random')
-    ls= svm.LinearSVC()
-    gb= ensemble.GradientBoostingClassifier(n_estimators=10000)
+    ls= svm.LinearSVC(penalty='l1', dual=False, C=0.075)
+    gb= ensemble.GradientBoostingClassifier()
     
-    ab= ensemble.AdaBoostClassifier(base_estimator= et, n_estimators=1000, learning_rate=0.9)
+    ab= ensemble.AdaBoostClassifier(base_estimator= rf, learning_rate=0.9)
     vc= ensemble.VotingClassifier(estimators=[('rf', rf),('kn', kn),('et',et)])
-    bc= ensemble.BaggingClassifier(base_estimator=rf, n_estimators=10)
+    bc= ensemble.BaggingClassifier(base_estimator=rf, n_estimators=100)
     
-    est= {#'randomforest': rf,
-          #'extratrees': et,
-          #'kneighbors': kn,
-          #'naivebayes': nb,
-          #'decisiontree': dt
-          #'linearsvm': ls,
-          'adaboost': ab
-          #'neuralnet': nn,
-          #'voting': vc
-          #'hobbitses': bc
+    est= {'randomforest': rf,
+          'extratrees': et,
+          'kneighbors': kn,
+          'naivebayes': nb,
+          'decisiontree': dt,
+          'linearsvc': ls,
+          'adaboost': ab,
+          'neuralnet': nn,
+          'voting': vc,
+          'hobbitses': bc,
+          'gboost': gb
           }
    
     train_results= {'fold':[], 'estimator':[], 'subjects':[], 
@@ -104,26 +105,30 @@ def OuterFolds():
     
     folds= len(ocv['X_train'])
 
-    rf= ensemble.RandomForestClassifier(n_estimators=201, criterion='entropy')
+    rf= ensemble.RandomForestClassifier(n_estimators=201, criterion='entropy', max_depth=2)
     et= ensemble.ExtraTreesClassifier(n_estimators=167, max_depth=2)
     kn= neighbors.KNeighborsClassifier(n_neighbors=35, weights='distance')
     nb= naive_bayes.GaussianNB()
     nn= neural_network.MLPClassifier(hidden_layer_sizes=(122,),solver='sgd', max_iter=2000)
-    dt= tree.DecisionTreeClassifier(max_depth=2, )
+    dt= tree.DecisionTreeClassifier(max_depth=2, splitter='random')
     ls= svm.LinearSVC()
-
-    ab= ensemble.AdaBoostClassifier(base_estimator= rf, n_estimators=1000, learning_rate=0.9)
-    vc= ensemble.VotingClassifier(estimators=[('rf', rf),('kn', kn),('et',et)])
+    gb= ensemble.GradientBoostingClassifier(n_estimators=10000)
     
-    est= {#'randomforest': rf
-          #'extratrees': et
-          #'kneighbors': kn
-          #'naivebayes': nb
+    ab= ensemble.AdaBoostClassifier(base_estimator= et, n_estimators=1000, learning_rate=0.9)
+    vc= ensemble.VotingClassifier(estimators=[('rf', rf),('kn', kn),('et',et)])
+    bc= ensemble.BaggingClassifier(base_estimator=rf, n_estimators=100)
+    
+    est= {'randomforest': rf,
+          #'extratrees': et,
+          #'kneighbors': kn,
+          #'naivebayes': nb,
           #'decisiontree': dt
-          #'linearsvm': ls
+          #'linearsvm': ls,
           #'adaboost': ab
-          #'neuralnet': nn
+          #'neuralnet': nn,
           #'voting': vc
+          #'hobbitses': bc
+          #'gboost': gb
           }
    
     train_results= {'fold':[], 'estimator':[], 'subjects':[], 
