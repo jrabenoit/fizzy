@@ -3,7 +3,7 @@
 import numpy as np
 import pandas as pd
 import copy, pickle
-from sklearn import svm, naive_bayes, neighbors, ensemble, linear_model, tree, discriminant_analysis
+from sklearn import svm, naive_bayes, neighbors, ensemble, linear_model, tree, neural_network
 
 def InnerFolds():
     with open('/media/james/ext4data1/current/projects/pfizer/icvfeats.pickle','rb') as f: icv=pickle.load(f)
@@ -11,13 +11,30 @@ def InnerFolds():
     
     folds= len(icv['X_train'])
     
-    est= {'randomforest': ensemble.RandomForestClassifier(), 
-          'extratrees': ensemble.ExtraTreesClassifier(),
-          'kneighbors': neighbors.KNeighborsClassifier(),
-          'naivebayes': naive_bayes.GaussianNB(),
-          'decisiontree': tree.DecisionTreeClassifier(),
-          'linearsvm': svm.LinearSVC(),
-          'adaboost': ensemble.AdaBoostClassifier()
+    
+    rf= ensemble.RandomForestClassifier(n_estimators=201, criterion='entropy')
+    et= ensemble.ExtraTreesClassifier(n_estimators=167, max_depth=2)
+    kn= neighbors.KNeighborsClassifier(n_neighbors=35, weights='distance')
+    nb= naive_bayes.GaussianNB()
+    nn= neural_network.MLPClassifier(hidden_layer_sizes=(122,),solver='sgd', max_iter=2000)
+    dt= tree.DecisionTreeClassifier(max_depth=2, splitter='random')
+    ls= svm.LinearSVC()
+    gb= ensemble.GradientBoostingClassifier(n_estimators=10000)
+    
+    ab= ensemble.AdaBoostClassifier(base_estimator= et, n_estimators=1000, learning_rate=0.9)
+    vc= ensemble.VotingClassifier(estimators=[('rf', rf),('kn', kn),('et',et)])
+    bc= ensemble.BaggingClassifier(base_estimator=rf, n_estimators=10)
+    
+    est= {#'randomforest': rf,
+          #'extratrees': et,
+          #'kneighbors': kn,
+          #'naivebayes': nb,
+          #'decisiontree': dt
+          #'linearsvm': ls,
+          'adaboost': ab
+          #'neuralnet': nn,
+          #'voting': vc
+          #'hobbitses': bc
           }
    
     train_results= {'fold':[], 'estimator':[], 'subjects':[], 
@@ -38,7 +55,7 @@ def InnerFolds():
         train_ids= patients.index[icv['train_indices'][i]]
         test_ids= patients.index[icv['test_indices'][i]]
         
-        for j,k in zip(est.keys(), est.values()):
+        for j,k in zip(est.keys(), est.values()):           
             k.fit(X_train, y_train)
             
             predict_train= k.predict(X_train)
@@ -86,14 +103,27 @@ def OuterFolds():
     patients= pd.read_csv('/media/james/ext4data1/current/projects/pfizer/labels_placebo.csv', encoding='utf-8').set_index('PATIENT')
     
     folds= len(ocv['X_train'])
+
+    rf= ensemble.RandomForestClassifier(n_estimators=201, criterion='entropy')
+    et= ensemble.ExtraTreesClassifier(n_estimators=167, max_depth=2)
+    kn= neighbors.KNeighborsClassifier(n_neighbors=35, weights='distance')
+    nb= naive_bayes.GaussianNB()
+    nn= neural_network.MLPClassifier(hidden_layer_sizes=(122,),solver='sgd', max_iter=2000)
+    dt= tree.DecisionTreeClassifier(max_depth=2, )
+    ls= svm.LinearSVC()
+
+    ab= ensemble.AdaBoostClassifier(base_estimator= rf, n_estimators=1000, learning_rate=0.9)
+    vc= ensemble.VotingClassifier(estimators=[('rf', rf),('kn', kn),('et',et)])
     
-    est= {'randomforest': ensemble.RandomForestClassifier(), 
-          #'extratrees': ensemble.ExtraTreesClassifier(),
-          #'kneighbors': neighbors.KNeighborsClassifier(),
-          #'naivebayes': naive_bayes.GaussianNB(),
-          #'decisiontree': tree.DecisionTreeClassifier(),
-          #'linearsvm': svm.LinearSVC(),
-          #'adaboost': ensemble.AdaBoostClassifier()
+    est= {#'randomforest': rf
+          #'extratrees': et
+          #'kneighbors': kn
+          #'naivebayes': nb
+          #'decisiontree': dt
+          #'linearsvm': ls
+          #'adaboost': ab
+          #'neuralnet': nn
+          #'voting': vc
           }
    
     train_results= {'fold':[], 'estimator':[], 'subjects':[], 
