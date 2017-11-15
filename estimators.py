@@ -23,16 +23,16 @@ def InnerFolds():
     
     ab= ensemble.AdaBoostClassifier(base_estimator= rf, learning_rate=0.9)
     vc= ensemble.VotingClassifier(estimators=[('rf', rf),('kn', kn),('et',et)])
-    bc= ensemble.BaggingClassifier(base_estimator=rf, n_estimators=100)
+    bc= ensemble.BaggingClassifier(base_estimator=rf, n_estimators=10)
     
-    est= {'randomforest': rf,
-          'extratrees': et,
-          'kneighbors': kn,
-          'naivebayes': nb,
-          'decisiontree': dt,
-          'linearsvc': ls,
+    est= {#'randomforest': rf,
+          #'extratrees': et,
+          #'kneighbors': kn,
+          #'naivebayes': nb,
+          #'decisiontree': dt,
+          #'linearsvc': ls,
           'adaboost': ab,
-          'neuralnet': nn,
+          #'neuralnet': nn,
           'voting': vc,
           'hobbitses': bc,
           'gboost': gb
@@ -49,6 +49,7 @@ def InnerFolds():
                    }
     
     for i in range(folds):
+        print(i+1)
         X_train= icv['X_train'][i]
         X_test= icv['X_test'][i]
         y_train= icv['y_train'][i]

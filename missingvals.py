@@ -10,11 +10,16 @@ from sklearn.preprocessing import MaxAbsScaler
 
 def Impute():
     '''Imputes missing vals by mean, scales as sparse matrix'''
-    info=pd.read_csv('/media/james/ext4data1/current/projects/pfizer/final_vecs.csv', encoding='utf-8')
-    info=info.set_index('PATIENT')
+    info=pd.read_csv('/media/james/ext4data1/current/projects/pfizer/final_vecs.csv', encoding='utf-8').set_index('PATIENT')
     
-    #tested axes- we want axis 0 to impute mean down a column
-    imp = Imputer(missing_values='NaN', strategy='mean', axis=0)
+    #first, remove columns with mostly blank values
+    info=info[info.columns[info.isnull().mean() < 0.95]]
+    #OR info= info.dropna(axis=1) to remove all vars with missing values
+
+    
+    #tested axes- we want axis 0 to impute mode down a column
+    #Using mode because of sparsity- if 99% of values are 0, most likely that this will be a 0 too.
+    imp = Imputer(missing_values='NaN', strategy='most_frequent', axis=0)
     X= imp.fit_transform(info)
     
     #using a sparse data scaler due to the number of zeros from binarized variables

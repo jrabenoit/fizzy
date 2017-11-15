@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 
 from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import SelectFromModel
+from sklearn.feature_selection import RFECV
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LassoCV
 import copy, pickle
 import numpy as np
 
@@ -18,13 +22,22 @@ def InnerFeats():
     folds= len(icv['X_train'])
     feats=[[0]]*folds
     
+    skb= SelectKBest(k=2100) #using 2100 as a 10% cut based on F-test
+    #sfm=SelectFromModel(LassoCV())
+    #doing second cut using rfecv to get correct # within skb
+    rfe= RFECV(RandomForestClassifier(), step=1, n_jobs=3)
+    
     for i in range(folds):
-        subjects=len(X_train[i])
-        skb= SelectKBest(k=subjects)
+        print(i+1)
+        subjects=len(X_train[i])        
         skb.fit(X_train[i], y_train[i])
-        feats[i]=skb.get_support(indices=True)
-        X_train_feats= skb.transform(X_train[i])
-        X_test_feats= skb.transform(X_test[i])
+        X_train_skb= skb.transform(X_train[i])
+        X_test_skb= skb.transform(X_test[i])
+
+        rfe.fit(X_train_skb, y_train[i])
+        feats[i]=rfe.get_support(indices=True)
+        X_train_feats= rfe.transform(X_train_skb)
+        X_test_feats= rfe.transform(X_test_skb)
         X_train[i]= np.array(X_train_feats)
         X_test[i]= np.array(X_test_feats)
     
