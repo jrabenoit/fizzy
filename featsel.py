@@ -22,11 +22,14 @@ def InnerFeats():
     folds= len(icv['X_train'])
     feats=[[0]]*folds
     
-    skb= SelectKBest(k=2100) #using 2100 as a 10% cut based on F-test
+    skb= SelectKBest(k=45) #using 45 as sqrt(2011)
     #sfm=SelectFromModel(LassoCV())
     #doing second cut using rfecv to get correct # within skb
     rfe= RFECV(RandomForestClassifier(), step=1, n_jobs=3)
     
+    #LOOK HERE
+    #COUPLE MORE THINGS TO TRY
+    #SKLEARN LASSOLARSIC SET WITH BIC MIGHT SET A MODEL WITH HIGHER ALPHA (HIGHER PENALIZATION), AND CREATE BETTER FEATURES
     for i in range(folds):
         print(i+1)
         subjects=len(X_train[i])        
@@ -34,12 +37,15 @@ def InnerFeats():
         X_train_skb= skb.transform(X_train[i])
         X_test_skb= skb.transform(X_test[i])
 
-        rfe.fit(X_train_skb, y_train[i])
-        feats[i]=rfe.get_support(indices=True)
-        X_train_feats= rfe.transform(X_train_skb)
-        X_test_feats= rfe.transform(X_test_skb)
-        X_train[i]= np.array(X_train_feats)
-        X_test[i]= np.array(X_test_feats)
+        #rfe.fit(X_train_skb, y_train[i])
+        #feats[i]=rfe.get_support(indices=True)
+        #X_train_feats= rfe.transform(X_train_skb)
+        #X_test_feats= rfe.transform(X_test_skb)
+        
+        X_train[i]= np.array(X_train_skb)
+        X_test[i]= np.array(X_test_skb)
+        #X_train[i]= np.array(X_train_feats)
+        #X_test[i]= np.array(X_test_feats)
     
     featdict={'Feature Indices':feats, 'X_train':X_train, 'X_test':X_test, 'y_train':y_train, 'y_test':y_test, 'train_indices':train_indices, 'test_indices':test_indices}
         
@@ -61,7 +67,7 @@ def OuterFeats():
     
     for i in range(folds):
         subjects=len(X_train[i])
-        skb= SelectKBest(k=subjects)
+        skb= SelectKBest(k=45)
         skb.fit(X_train[i], y_train[i])
         feats[i]=skb.get_support(indices=True)
         X_train_feats= skb.transform(X_train[i])

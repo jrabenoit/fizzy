@@ -5,6 +5,9 @@ import pandas as pd
 import copy, pickle
 from sklearn import svm, naive_bayes, neighbors, ensemble, linear_model, tree, neural_network
 
+
+#Quick note: feature_importances_ can be used with random forest etc. to generate feature importance lists
+
 def InnerFolds():
     with open('/media/james/ext4data1/current/projects/pfizer/icvfeats.pickle','rb') as f: icv=pickle.load(f)
     patients= pd.read_csv('/media/james/ext4data1/current/projects/pfizer/labels_placebo.csv', encoding='utf-8').set_index('PATIENT')
@@ -25,14 +28,14 @@ def InnerFolds():
     vc= ensemble.VotingClassifier(estimators=[('rf', rf),('kn', kn),('et',et)])
     bc= ensemble.BaggingClassifier(base_estimator=rf, n_estimators=10)
     
-    est= {#'randomforest': rf,
-          #'extratrees': et,
-          #'kneighbors': kn,
-          #'naivebayes': nb,
-          #'decisiontree': dt,
-          #'linearsvc': ls,
+    est= {'randomforest': rf,
+          'extratrees': et,
+          'kneighbors': kn,
+          'naivebayes': nb,
+          'decisiontree': dt,
+          'linearsvc': ls,
           'adaboost': ab,
-          #'neuralnet': nn,
+          'neuralnet': nn,
           'voting': vc,
           'hobbitses': bc,
           'gboost': gb
@@ -120,14 +123,14 @@ def OuterFolds():
     bc= ensemble.BaggingClassifier(base_estimator=rf, n_estimators=100)
     
     est= {'randomforest': rf,
-          #'extratrees': et,
+          'extratrees': et,
           #'kneighbors': kn,
           #'naivebayes': nb,
           #'decisiontree': dt
           #'linearsvm': ls,
           #'adaboost': ab
           #'neuralnet': nn,
-          #'voting': vc
+          'voting': vc
           #'hobbitses': bc
           #'gboost': gb
           }

@@ -12,9 +12,8 @@ def Impute():
     '''Imputes missing vals by mean, scales as sparse matrix'''
     info=pd.read_csv('/media/james/ext4data1/current/projects/pfizer/final_vecs.csv', encoding='utf-8').set_index('PATIENT')
     
-    #first, remove columns with mostly blank values
-    info=info[info.columns[info.isnull().mean() < 0.95]]
-    #OR info= info.dropna(axis=1) to remove all vars with missing values
+    #first, remove columns with NaN values
+    info= info.dropna(axis=1)
 
     
     #tested axes- we want axis 0 to impute mode down a column

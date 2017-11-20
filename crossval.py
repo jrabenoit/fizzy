@@ -39,7 +39,7 @@ def OuterCv():
     
 def InnerCv():
     '''Set up as a flat structure of 25 df'''
-    with open('/media/james/ext4data1/current/projects/pfizer/outer_cv.pickle', 'rb') as f: outer_cv= pickle.load(f)
+    with open('/media/james/ext4data1/current/projects/pfizer/ocv.pickle', 'rb') as f: outer_cv= pickle.load(f)
 
     inner_cv= {'X_train': [], 'X_test': [], 
                'y_train': [], 'y_test': [],
