@@ -18,7 +18,7 @@ def Impute():
     
     #tested axes- we want axis 0 to impute mode down a column
     #Using mode because of sparsity- if 99% of values are 0, most likely that this will be a 0 too.
-    imp = Imputer(missing_values='NaN', strategy='most_frequent', axis=0)
+    imp = Imputer(missing_values='NaN', strategy='median', axis=0)
     X= imp.fit_transform(info)
     
     #using a sparse data scaler due to the number of zeros from binarized variables

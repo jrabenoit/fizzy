@@ -4,9 +4,21 @@ import pandas as pd
 import os, scipy.stats
 import numpy as np
 
-def Misc():
-    #binarizes based on presence/absence of data in each cell in a column
-    data[['AEPTX']]= np.where(data[['AEPTX']].isnull(), 0, 1)
+def Misc():    
+    #Encode categorical variables as integers rather than using onehot or dummy variables- do on a column-by-column basis
+    demow['ETHNIC']=pd.Categorical(demow['ETHNIC']).codes
+
+    #pivots table
+    d60p= d60.pivot(index='PATIENT',columns='TESTS',values='VALN')
+
+    #drops duplicates if both column 1 AND column 2 have the same row value
+    lab=lab.drop_duplicates(subset=['PATIENT', 'LPARM'], keep='first')
+    #pivot each column of lab to its own table (lab1, lab2, etc)
+    lab1= lab.pivot(index='PATIENT',columns='LPARM',values='LVALN')
+    #relabels columns so join works
+    lab1.columns='lab1-'+lab1.columns
+    #joins tables 
+    labs=lab1.join([lab2, lab3])
 
     return
 
@@ -65,10 +77,11 @@ def Homeopathy():
     return
 
 #>>>
-#NOW CUT THE TABLES DOWN TO THE DAY YOU WANT MANUALLY
+#NOW PIVOT/CUT/ENCODE THE TABLES DOWN MANUALLY
 #>>>
 
 def Binarizer():
+    #Use if you're making binarized variables
     csv= ['deid_adverse', 'deid_aemeddra', 'deid_medhist', 'deid_medhist2', 'deid_nsmed', 'deid_othtrt']
     for i in csv:
         info=pd.read_csv('/media/james/ext4data1/current/projects/pfizer/3151A1-303-csv/'+str(i)+'.csv', encoding='utf-8')
