@@ -22,7 +22,7 @@ def InnerFeats():
     folds= len(icv['X_train'])
     feats=[[0]]*folds
     
-    skb= SelectKBest(k=45) #using 45 as sqrt(2011)
+    skb= SelectKBest()
     #sfm=SelectFromModel(LassoCV())
     #doing second cut using rfecv to get correct # within skb
     rfe= RFECV(RandomForestClassifier(), step=1, n_jobs=3)
@@ -67,7 +67,7 @@ def OuterFeats():
     
     for i in range(folds):
         subjects=len(X_train[i])
-        skb= SelectKBest(k=45)
+        skb= SelectKBest()
         skb.fit(X_train[i], y_train[i])
         feats[i]=skb.get_support(indices=True)
         X_train_feats= skb.transform(X_train[i])

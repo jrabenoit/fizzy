@@ -10,7 +10,7 @@ from sklearn import svm, naive_bayes, neighbors, ensemble, linear_model, tree, n
 
 def InnerFolds():
     with open('/media/james/ext4data1/current/projects/pfizer/icvfeats.pickle','rb') as f: icv=pickle.load(f)
-    patients= pd.read_csv('/media/james/ext4data1/current/projects/pfizer/labels_placebo.csv', encoding='utf-8').set_index('PATIENT')
+    patients= pd.read_csv('/media/james/ext4data1/current/projects/pfizer/labels-final.csv', encoding='utf-8').set_index('PATIENT')
     
     folds= len(icv['X_train'])
     
@@ -105,32 +105,32 @@ def InnerFolds():
 
 def OuterFolds():
     with open('/media/james/ext4data1/current/projects/pfizer/ocvfeats.pickle','rb') as f: ocv=pickle.load(f)
-    patients= pd.read_csv('/media/james/ext4data1/current/projects/pfizer/labels_placebo.csv', encoding='utf-8').set_index('PATIENT')
+    patients= pd.read_csv('/media/james/ext4data1/current/projects/pfizer/labels-final.csv', encoding='utf-8').set_index('PATIENT')
     
     folds= len(ocv['X_train'])
 
-    rf= ensemble.RandomForestClassifier(n_estimators=201, criterion='entropy', max_depth=2)
-    et= ensemble.ExtraTreesClassifier(n_estimators=167, max_depth=2)
-    kn= neighbors.KNeighborsClassifier(n_neighbors=35, weights='distance')
+    rf= ensemble.RandomForestClassifier()
+    et= ensemble.ExtraTreesClassifier()
+    kn= neighbors.KNeighborsClassifier()
     nb= naive_bayes.GaussianNB()
-    nn= neural_network.MLPClassifier(hidden_layer_sizes=(122,),solver='sgd', max_iter=2000)
-    dt= tree.DecisionTreeClassifier(max_depth=2, splitter='random')
+    nn= neural_network.MLPClassifier()
+    dt= tree.DecisionTreeClassifier()
     ls= svm.LinearSVC()
-    gb= ensemble.GradientBoostingClassifier(n_estimators=10000)
+    gb= ensemble.GradientBoostingClassifier()
     
-    ab= ensemble.AdaBoostClassifier(base_estimator= et, n_estimators=1000, learning_rate=0.9)
+    ab= ensemble.AdaBoostClassifier()
     vc= ensemble.VotingClassifier(estimators=[('rf', rf),('kn', kn),('et',et)])
     bc= ensemble.BaggingClassifier(base_estimator=rf, n_estimators=100)
     
-    est= {'randomforest': rf,
-          'extratrees': et,
+    est= {#'randomforest': rf,
+          #'extratrees': et,
           #'kneighbors': kn,
           #'naivebayes': nb,
           #'decisiontree': dt
-          #'linearsvm': ls,
+          'linearsvm': ls,
           #'adaboost': ab
           #'neuralnet': nn,
-          'voting': vc
+          #'voting': vc
           #'hobbitses': bc
           #'gboost': gb
           }

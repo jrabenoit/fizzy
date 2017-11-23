@@ -29,7 +29,13 @@ def Impute():
     mms= MinMaxScaler() #Gets features to a 0-1 range
     
     X= ss.fit_transform(X)
-    X=mms.fit_transform(X)
+    X= mms.fit_transform(X)
+    
+    labels=pd.read_csv('/media/james/ext4data1/current/projects/pfizer/labels-final.csv', encoding='utf-8').set_index('PATIENT')
+    labels= labels.join(info, how='inner')
+    labels= pd.DataFrame(index=labels.index, data=labels['GROUPLABEL'], columns=['GROUPLABEL'])
+    labels.to_csv(path_or_buf='/media/james/ext4data1/current/projects/pfizer/labels-final.csv', index_label='PATIENT')
+    
     
     #str((np.count_nonzero(X)/(X.shape[0]*X.shape[1]))*100) to get density... 96% sparse 
     #Should return to the psych scales (madrs, hamd etc) and encode using OneHotEncoder, since continuous variables are expected.

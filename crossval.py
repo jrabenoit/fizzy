@@ -8,7 +8,7 @@ from sklearn.model_selection import StratifiedKFold
 def OuterCv():   
     
     data=np.loadtxt('/media/james/ext4data1/current/projects/pfizer/data.csv', delimiter=',')
-    labels=np.array(pd.read_csv('/media/james/ext4data1/current/projects/pfizer/labels_placebo.csv', encoding='utf-8')['GROUPLABEL'])
+    labels=np.array(pd.read_csv('/media/james/ext4data1/current/projects/pfizer/labels-final.csv', encoding='utf-8')['GROUPLABEL'])
         
     #Treatment Response: 379 subjects, 200 remitters (52.77%), 179 with HAM-D > 7\n')
     

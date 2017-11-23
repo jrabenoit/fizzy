@@ -48,7 +48,7 @@ def Labeler():
 
 
 def GroupDefiner():
-    labels=pd.read_csv('/media/james/ext4data1/current/projects/pfizer/labels-d60-remitters.csv', encoding='utf-8').set_index('PATIENT').sort_index()
+    labels=pd.read_csv('/media/james/ext4data1/current/projects/pfizer/labels-d60-placebo-remitters.csv', encoding='utf-8').set_index('PATIENT').sort_index()
     placebos=pd.read_csv('/media/james/ext4data1/current/projects/pfizer/placebo-patients.csv').set_index('PATIENT').sort_index()
     therapy= pd.read_csv('/media/james/ext4data1/current/projects/pfizer/therapy-60-completed.csv').set_index('PATIENT').sort_index()
     

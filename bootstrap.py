@@ -37,10 +37,10 @@ def Bill():
     
     bdf= pd.DataFrame.from_dict(bootstrap_results, orient='index')
     
-    #binner=np.digitize(distribution, np.array(range(0,101)))
-    #plt.plot([52.77,52.77],[0,list(binner).count(statistics.mode(binner))],'-r',lw=2)
-    #plt.hist(distribution, bins=list(range(0,101)))
-    #plt.show()
+    binner=np.digitize(distribution, np.array(range(0,101)))
+    plt.plot([52.77,52.77],[0,list(binner).count(statistics.mode(binner))],'-r',lw=2)
+    plt.hist(distribution, bins=list(range(0,101)))
+    plt.show()
     
     bdf.to_csv(path_or_buf='/media/james/ext4data1/current/projects/pfizer/bootstrap_results.csv')
     
