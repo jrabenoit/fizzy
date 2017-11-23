@@ -4,6 +4,70 @@ import pandas as pd
 import os, scipy.stats
 import numpy as np
 
+def Misc():
+    #binarizes based on presence/absence of data in each cell in a column
+    data[['AEPTX']]= np.where(data[['AEPTX']].isnull(), 0, 1)
+
+    return
+
+
+def Labeler():
+    hamd=pd.read_csv('/media/james/ext4data1/current/projects/pfizer/303-data/deid_hamd17a.csv')
+    d60=hamd[hamd['CPENM']=='DAY 60']
+    d60p= d60.pivot(index='PATIENT',columns='TESTS',values='VALN')
+       
+    mddict={}
+    for i in d60p.index:        
+        if d60p.loc[i,'Total Score (HAM-D17)']<=7: remit=1
+        else: remit=0
+        mddict[i]=remit
+        
+    labels=pd.DataFrame.from_dict(mddict, orient='index')
+    labels.columns= ['GROUPLABEL']
+    labels=labels.sort_index()
+            
+    labels.to_csv(path_or_buf='/media/james/ext4data1/current/projects/pfizer/labels-d60-remitters.csv', index_label='PATIENT')
+        
+    return
+
+
+def GroupDefiner():
+    labels=pd.read_csv('/media/james/ext4data1/current/projects/pfizer/labels-d60-remitters.csv', encoding='utf-8').set_index('PATIENT').sort_index()
+    placebos=pd.read_csv('/media/james/ext4data1/current/projects/pfizer/placebo-patients.csv').set_index('PATIENT').sort_index()
+    therapy= pd.read_csv('/media/james/ext4data1/current/projects/pfizer/therapy-60-completed.csv').set_index('PATIENT').sort_index()
+    
+    placebos=placebos[placebos['TPNAME']=='Placebo']
+    
+    therapy=therapy[therapy['THERDUR>=60']==1]   
+    
+    final= labels.join([placebos, therapy], how='inner')
+    
+    del final['TPNAME']
+    del final['THERDUR>=60']
+    
+    final.to_csv(path_or_buf='/media/james/ext4data1/current/projects/pfizer/labels-final.csv', index_label='PATIENT')
+
+    return
+    
+    
+def Homeopathy():
+    #Cuts all tables to subjects in labels-final
+    patients=pd.read_csv('/media/james/ext4data1/current/projects/pfizer/labels-final.csv', encoding='utf-8').set_index('PATIENT').index
+    
+    path= '/media/james/ext4data1/current/projects/pfizer/303-data-baseline/'
+    csvs= os.listdir(path)
+    for i in csvs:
+        a= pd.read_csv(path+i)
+        b= a[a['PATIENT'].isin(patients)]
+        b= b.set_index('PATIENT')
+        b.to_csv(path_or_buf='/media/james/ext4data1/current/projects/pfizer/303-data-baseline/cut-'+str(i), index_label='PATIENT')
+    
+    return
+
+#>>>
+#NOW CUT THE TABLES DOWN TO THE DAY YOU WANT MANUALLY
+#>>>
+
 def Binarizer():
     csv= ['deid_adverse', 'deid_aemeddra', 'deid_medhist', 'deid_medhist2', 'deid_nsmed', 'deid_othtrt']
     for i in csv:
@@ -22,55 +86,6 @@ def Binarizer():
         d.to_csv(path_or_buf='/media/james/ext4data1/current/projects/pfizer/vecs/vecs_'+str(i)+'.csv', index_label='PATIENT')
         #this gives a dataframe with all variables binarized 
 
-    return
-
-
-def Labeler():
-    hamd=pd.read_csv('/media/james/ext4data1/current/projects/pfizer/3151A1-303-csv all patients all days/deid_hamd17.csv')
-    d60=hamd[hamd['CPENM']=='DAY 60']
-    d60p= d60.pivot(index='PATIENT',columns='TESTS',values='VALN')
-       
-    mddict={}
-    for i in d60p.index:        
-        if d60p.loc[i,'HAMD Total']<=7: mdd=0
-        else: mdd=1
-        mddict[i]=mdd
-        
-    labels=pd.DataFrame.from_dict(mddict, orient='index')
-    labels.columns= ['GROUPLABEL']
-    labels=labels.sort_index()
-            
-    labels.to_csv(path_or_buf='/media/james/ext4data1/current/projects/pfizer/labels_allpatients.csv', index_label='PATIENT')
-        
-    return
-
-
-def GroupDefiner():
-    labels=pd.read_csv('/media/james/ext4data1/current/projects/pfizer/labels_allpatients.csv', encoding='utf-8').set_index('PATIENT').sort_index()
-    placebos=pd.read_csv('/media/james/ext4data1/current/projects/pfizer/3151A1-303-csv all patients all days/deid_diaghist.csv').set_index('PATIENT').sort_index()
-    
-    placebos=placebos[placebos['TPNAME']=='Placebo']
-    
-    labels= labels[labels.index.isin(placebos.index)]
-    
-    labels.to_csv(path_or_buf='/media/james/ext4data1/current/projects/pfizer/labels_placebo.csv', index_label='PATIENT')
-
-    return
-
-    
-def Homeopathy():
-    #Cuts all tables to Placebo subjects
-    info=pd.read_csv('/media/james/ext4data1/current/projects/pfizer/placebo_patients.csv', encoding='utf-8')
-    placebos= list(info['PATIENT'])
-    
-    path= '/media/james/ext4data1/current/projects/pfizer/vecs/'
-    csvs= os.listdir(path)
-    for i in csvs:
-        a= pd.read_csv(path+i)
-        b= a[a['PATIENT'].isin(placebos)]
-        b= b.set_index('PATIENT')
-        b.to_csv(path_or_buf='/media/james/ext4data1/current/projects/pfizer/vecs_placebos/placebos_'+str(i), index_label='PATIENT')
-    
     return
 
 
