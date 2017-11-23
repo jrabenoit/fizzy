@@ -13,11 +13,15 @@ def Misc():
 
     #drops duplicates if both column 1 AND column 2 have the same row value
     lab=lab.drop_duplicates(subset=['PATIENT', 'LPARM'], keep='first')
+    #Encodes variables
+    lab1['ETHNIC']=pd.Categorical(lab1['ETHNIC']).codes
     #pivot each column of lab to its own table (lab1, lab2, etc)
     lab1= lab.pivot(index='PATIENT',columns='LPARM',values='LVALN')
     #relabels columns so join works
     lab1.columns='lab1-'+lab1.columns
+    
     #joins tables 
+
     labs=lab1.join([lab2, lab3])
 
     return
@@ -106,16 +110,15 @@ def Harvester():
     '''Because it's a combine. Aha. Ha.'''
     #But seriously, joins all tables together by patient row
     
-    info= pd.read_csv('/media/james/ext4data1/current/projects/pfizer/labels_placebo.csv', encoding='utf-8').set_index('PATIENT').drop('GROUPLABEL', axis=1)
+    info= pd.read_csv('/media/james/ext4data1/current/projects/pfizer/labels-d60-placebo-remitters.csv', encoding='utf-8').set_index('PATIENT').drop('GROUPLABEL', axis=1)
     
-    path= '/media/james/ext4data1/current/projects/pfizer/vecs_placebos/'
+    path= '/media/james/ext4data1/current/projects/pfizer/303-data-baseline-final/'
     csvs= os.listdir(path)    
     for i in csvs:
-        a=pd.read_csv(path+i)
-        a=a.set_index('PATIENT')
-        info=pd.concat([info, a], axis=1)
+        a=pd.read_csv(path+i).set_index('PATIENT')
+        info=info.join(a, how='inner')
     
-    info.to_csv(path_or_buf='/media/james/ext4data1/current/projects/pfizer/final_vecs.csv', index_label='PATIENT')
+    info.to_csv(path_or_buf='/media/james/ext4data1/current/projects/pfizer/joined-vecs.csv', index_label='PATIENT')
     
     return
 
